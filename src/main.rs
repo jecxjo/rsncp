@@ -2,6 +2,7 @@ mod commands;
 mod common;
 
 use clap::{App, AppSettings, Arg};
+use commands::listen::Listen;
 use commands::send::Send;
 
 fn main() {
@@ -43,7 +44,10 @@ fn main() {
         .get_matches();
 
     let results = match matches.subcommand() {
-        ("listen", _) => Err(String::from("Listen not implemented")),
+        ("listen", _) => {
+            let listen = Listen {};
+            listen.do_listen()
+        }
         ("send", Some(send_matches)) => {
             let dst = send_matches.value_of("DEST").unwrap();
             let files = send_matches
