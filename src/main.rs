@@ -1,8 +1,14 @@
+#[macro_use]
+extern crate lazy_static;
+extern crate socket2;
+
 mod commands;
 mod common;
 
 use clap::{App, AppSettings, Arg};
 use commands::listen::Listen;
+use commands::poll::Poll;
+use commands::push::Push;
 use commands::send::Send;
 
 fn main() {
@@ -61,9 +67,26 @@ fn main() {
             let send = Send::new(String::from(dst), files);
             send.do_send()
         }
-        ("push", _) => Err(String::from("Push not implemented")),
-        ("poll", _) => Err(String::from("Poll not implemented")),
-        ("", _) => Err(String::from("No subcommand issued")),
+        ("poll", _) => {
+            let poll = Poll {};
+            poll.do_poll()
+        }
+        ("push", Some(push_matches)) => {
+            let files = push_matches
+                .values_of("FILES")
+                .unwrap()
+                .collect::<Vec<_>>()
+                .iter()
+                .map(|s| String::from(*s))
+                .collect::<Vec<String>>();
+
+            let push = Push::new(files);
+            push.do_push()
+        }
+        ("", _) => {
+            let listen = Listen {};
+            listen.do_listen()
+        }
         _ => unreachable!(),
     };
 

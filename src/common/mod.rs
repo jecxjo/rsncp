@@ -1,3 +1,5 @@
+pub mod networking;
+
 use glob::glob;
 use std::fs::metadata;
 
