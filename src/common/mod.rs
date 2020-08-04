@@ -1,3 +1,5 @@
+pub mod networking;
+
 use glob::glob;
 use std::fs::metadata;
 
@@ -36,4 +38,10 @@ pub fn validate_files(files: &Vec<File>) -> Result<Vec<File>, String> {
     }
 
     Ok(new_files)
+}
+
+pub fn version() -> String {
+    let ver = option_env!("CARGO_PKG_VERSION");
+
+    String::from(ver.unwrap_or("unknown"))
 }

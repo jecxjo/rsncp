@@ -10,7 +10,7 @@ impl Listen {
         println!("[*] waiting for a connection");
 
         let listener =
-            TcpListener::bind("0.0.0:8002").or(Err(String::from("Failed to open socket")))?;
+            TcpListener::bind("0.0.0.0:8002").or(Err(String::from("Failed to open socket")))?;
 
         let (mut socket, addr) = listener
             .accept()

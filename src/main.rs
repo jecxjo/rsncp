@@ -1,14 +1,21 @@
+#[macro_use]
+extern crate lazy_static;
+extern crate socket2;
+
 mod commands;
 mod common;
 
 use clap::{App, AppSettings, Arg};
 use commands::listen::Listen;
+use commands::poll::Poll;
+use commands::push::Push;
 use commands::send::Send;
+use common::version;
 
 fn main() {
     let matches = App::new("rsncp")
         .about("Rust implementation of Network Copy")
-        .version("0.0.0")
+        .version(version().as_str())
         .author("Jeff Parent")
         .subcommand(App::new("listen").about("runs in listener mode, waits for connection"))
         .subcommand(
@@ -34,7 +41,7 @@ fn main() {
                 .about("broadcasts for clients, waits for connection")
                 .setting(AppSettings::ArgRequiredElseHelp)
                 .arg(
-                    Arg::with_name("FILE")
+                    Arg::with_name("FILES")
                         .help("Files to send")
                         .required(true)
                         .multiple(true),
@@ -45,10 +52,12 @@ fn main() {
 
     let results = match matches.subcommand() {
         ("listen", _) => {
+            println!("[#] Listening for files from Sender");
             let listen = Listen {};
             listen.do_listen()
         }
         ("send", Some(send_matches)) => {
+            println!("[#] Sending files to Listener");
             let dst = send_matches.value_of("DEST").unwrap();
             let files = send_matches
                 .values_of("FILES")
@@ -61,9 +70,29 @@ fn main() {
             let send = Send::new(String::from(dst), files);
             send.do_send()
         }
-        ("push", _) => Err(String::from("Push not implemented")),
-        ("poll", _) => Err(String::from("Poll not implemented")),
-        ("", _) => Err(String::from("No subcommand issued")),
+        ("poll", _) => {
+            println!("[#] Polling for Broadcaster");
+            let poll = Poll {};
+            poll.do_poll()
+        }
+        ("push", Some(push_matches)) => {
+            println!("[#] Pushing to Poller");
+            let files = push_matches
+                .values_of("FILES")
+                .unwrap()
+                .collect::<Vec<_>>()
+                .iter()
+                .map(|s| String::from(*s))
+                .collect::<Vec<String>>();
+
+            let push = Push::new(files);
+            push.do_push()
+        }
+        ("", _) => {
+            println!("[#] Listening for files from Sender");
+            let listen = Listen {};
+            listen.do_listen()
+        }
         _ => unreachable!(),
     };
 
