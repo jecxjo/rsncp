@@ -9,18 +9,19 @@ pub struct Poll {}
 
 impl Poll {
     pub fn do_poll(&self) -> Result<(), String> {
-        println!("[*] waiting for something-cast");
-        let mut pusher;
+        let pusher;
 
         // Detection of multicast
         {
             let addr = SocketAddr::new(*networking::IPV4, networking::PORT);
             let listener = networking::join_multicast(addr)
                 .or(Err(String::from("Failed to join multicast")))?;
+            println!("[#] Joining multicast group");
 
             let mut buf = [0u8; 1024]; // receive buffer
 
             loop {
+                println!("[*] waiting for something-cast");
                 match listener.recv_from(&mut buf) {
                     Ok((len, remote_addr)) => {
                         let data = &buf[..len];

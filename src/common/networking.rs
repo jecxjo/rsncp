@@ -1,4 +1,4 @@
-use socket2::{Domain, Protocol, Socket, Type};
+use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, UdpSocket};
 
@@ -56,6 +56,27 @@ pub fn join_multicast(addr: SocketAddr) -> io::Result<UdpSocket> {
     }
 
     bind_multicast(&socket, &addr)?;
+
+    Ok(socket.into_udp_socket())
+}
+
+pub fn new_sender(addr: &SocketAddr) -> io::Result<UdpSocket> {
+    let socket = new_socket(addr)?;
+
+    if addr.is_ipv4() {
+        socket.set_multicast_if_v4(&Ipv4Addr::new(0, 0, 0, 0))?;
+
+        socket.bind(&SockAddr::from(SocketAddr::new(
+            Ipv4Addr::new(0, 0, 0, 0).into(),
+            PORT,
+        )))?;
+    } else {
+        socket.set_multicast_if_v6(0)?;
+        socket.bind(&SockAddr::from(SocketAddr::new(
+            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0).into(),
+            PORT,
+        )))?;
+    }
 
     Ok(socket.into_udp_socket())
 }
