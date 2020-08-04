@@ -1,3 +1,4 @@
+pub mod compression;
 pub mod networking;
 
 use glob::glob;

@@ -1,12 +1,10 @@
 use crate::common;
 use crate::common::networking;
-use flate2::{Compression, GzBuilder};
 use std::io::prelude::*;
 use std::io::ErrorKind;
 use std::net::SocketAddr;
 use std::net::TcpListener;
 use std::{thread, time};
-use tar::Builder;
 
 pub struct Push {
     files: Vec<common::File>,
@@ -21,26 +19,8 @@ impl Push {
         let announce = format!("Multicasting for rsncp version {}", common::version());
         let announce = announce.as_bytes();
 
-        let mut ar = Builder::new(Vec::new());
-        let compressed_data = Vec::new();
-        let mut gz = GzBuilder::new().write(compressed_data, Compression::fast());
-
-        println!("[*] Bundling {:?} ", self.files.as_slice());
-        let data = common::validate_files(&self.files)?;
-        println!("[#] start preparing files");
-        for f in data.iter() {
-            println!("[*] adding: {}", f);
-            ar.append_path(f)
-                .or(Err(String::from("Failed to read file")))?;
-        }
-
-        let data = ar
-            .into_inner()
-            .or(Err(String::from("Failed reading file archive")))?;
-        gz.write_all(&data)
-            .or(Err(String::from("Failed to compress")))?;
-        let data = gz.finish().or(Err(String::from("Failed to compress")))?;
-        let sending_data: &[u8] = &data;
+        let compressed = common::compression::pack(&self.files)?;
+        let sending_data: &[u8] = &compressed;
 
         println!("[*] starting X-Casting, waiting for TCP connect");
         let addr = SocketAddr::new(*networking::IPV4, networking::PORT);
