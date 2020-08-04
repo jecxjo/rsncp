@@ -1,7 +1,6 @@
-use flate2::write::GzDecoder;
+use crate::common;
 use std::io::prelude::*;
 use std::net::TcpListener;
-use tar::Archive;
 
 pub struct Listen {}
 
@@ -36,18 +35,7 @@ impl Listen {
             }
         }
 
-        let mut writer = Vec::new();
-        let mut decoder = GzDecoder::new(writer);
-        decoder
-            .write_all(&data)
-            .or(Err(String::from("Failed to decompress stream")))?;
-        writer = decoder
-            .finish()
-            .or(Err(String::from("Issue with compression")))?;
-
-        let mut ar = Archive::new(&writer[..]);
-        ar.unpack(".")
-            .or(Err(String::from("Failed to unpack tarbal")))?;
+        common::compression::unpack(&data)?;
 
         Ok(())
     }

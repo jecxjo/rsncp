@@ -1,9 +1,8 @@
+use crate::common;
 use crate::common::networking;
-use flate2::write::GzDecoder;
 use std::io::prelude::*;
 use std::net::SocketAddr;
 use std::net::TcpStream;
-use tar::Archive;
 
 pub struct Poll {}
 
@@ -68,18 +67,7 @@ impl Poll {
             }
         }
 
-        let mut writer = Vec::new();
-        let mut decoder = GzDecoder::new(writer);
-        decoder
-            .write_all(&data)
-            .or(Err(String::from("Failed to decompress stream")))?;
-        writer = decoder
-            .finish()
-            .or(Err(String::from("Issue with compression")))?;
-
-        let mut ar = Archive::new(&writer[..]);
-        ar.unpack(".")
-            .or(Err(String::from("Failed to unpack tarbal")))?;
+        common::compression::unpack(&data)?;
 
         Ok(())
     }
