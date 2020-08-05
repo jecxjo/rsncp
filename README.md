@@ -6,9 +6,7 @@ Leitner <felix-ncp@fefe.de>
 
 At the moment rsncp seems to be compatible with pyncp's default settings
 (i.e. Multicast for poll/push and gzip compression) but all options 
-will eventually be implemented via command line arguments. Also, all
-code should be pure ruby (minitar and Glib gems) so it should work with
-most if not all OS's.
+will eventually be implemented via command line arguments.
 
 Installation
 ------------
@@ -31,7 +29,7 @@ To send a file or directory directly:
 
 Supports IPV6
 
-   $ rsncp send "[::1]" file.txt
+    $ rsncp send "[::1]" file.txt
 
 To send files and directories without knowing IP Addresses or Hostnames 
 setup a Multicast/Broadcast Poll on the destination machine:
