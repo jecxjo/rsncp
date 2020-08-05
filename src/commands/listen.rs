@@ -3,9 +3,17 @@ use std::io::prelude::*;
 use std::net::TcpListener;
 use std::{thread, time};
 
-pub struct Listen {}
+pub struct Listen {
+    legacy: bool
+}
 
 impl Listen {
+    pub fn new(legacy: bool) -> Self {
+        Listen {
+            legacy
+        }
+    }
+
     pub fn do_listen(&self) -> Result<(), String> {
         println!("[*] waiting for a connection");
 
@@ -61,7 +69,7 @@ impl Listen {
                 }
             }
 
-            compression::unpack(&data)?;
+            compression::unpack(self.legacy, &data)?;
 
             Ok(())
         } else {

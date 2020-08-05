@@ -4,10 +4,6 @@ This project is a port of Pyncp which is a port of the original
 "ncp - a fast file copy tool for LANs" originally written by Felix von
 Leitner <felix-ncp@fefe.de>
 
-At the moment rsncp seems to be compatible with pyncp's default settings
-(i.e. Multicast for poll/push and gzip compression) but all options 
-will eventually be implemented via command line arguments.
-
 Installation
 ------------
 
@@ -39,6 +35,14 @@ setup a Multicast/Broadcast Poll on the destination machine:
 To send via Multicast/Broadcast use a push:
 
     $ rsncp push file.txt ./directory
+
+For legacy support (no compression) to work with the original ncp, use the `-l`
+flag in all commands.
+
+    $ rsncp listen -l
+    $ rsncp send -l localhost test.txt
+    $ rsncp poll -l
+    $ rsncp push -l test.txt
 
 Credits
 -------

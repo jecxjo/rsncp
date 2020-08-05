@@ -17,11 +17,24 @@ fn main() {
         .about("Rust implementation of Network Copy")
         .version(version().as_str())
         .author("Jeff Parent")
-        .subcommand(App::new("listen").about("runs in listener mode, waits for connection"))
+        .subcommand(
+            App::new("listen")
+                .about("runs in listener mode, waits for connection")
+                .arg(
+                    Arg::with_name("legacy")
+                        .short("l")
+                        .help("Enables legacy support (no compression)")
+                )
+        )
         .subcommand(
             App::new("send")
                 .about("sends files to a listener mode receiver")
                 .setting(AppSettings::ArgRequiredElseHelp)
+                .arg(
+                    Arg::with_name("legacy")
+                        .short("l")
+                        .help("Enables legacy support (no compression)")
+                )
                 .arg(
                     Arg::with_name("DEST")
                         .help("IP / Domain Name of listening connection")
@@ -41,23 +54,39 @@ fn main() {
                 .about("broadcasts for clients, waits for connection")
                 .setting(AppSettings::ArgRequiredElseHelp)
                 .arg(
+                    Arg::with_name("legacy")
+                        .short("l")
+                        .help("Enables legacy support (no compression)")
+                )
+                .arg(
                     Arg::with_name("FILES")
                         .help("Files to send")
                         .required(true)
                         .multiple(true),
                 ),
         )
-        .subcommand(App::new("poll").about("waits for braodcast, connects to braodcaster"))
+        .subcommand(App::new("poll")
+            .about("waits for braodcast, connects to braodcaster")
+            .arg(
+                Arg::with_name("legacy")
+                .short("l")
+                .help("Enables legacy support (no compression)")
+            )
+        )
         .get_matches();
 
     let results = match matches.subcommand() {
-        ("listen", _) => {
+        ("listen", Some(listen_matches)) => {
+            let legacy = listen_matches.is_present("legacy");
+
+            if legacy { println!("[#] LEGACY MODE"); }
+
             println!("[#] Listening for files from Sender");
-            let listen = Listen {};
+            let listen = Listen::new(legacy);
             listen.do_listen()
         }
         ("send", Some(send_matches)) => {
-            println!("[#] Sending files to Listener");
+            let legacy = send_matches.is_present("legacy");
             let dst = send_matches.value_of("DEST").unwrap();
             let files = send_matches
                 .values_of("FILES")
@@ -67,15 +96,25 @@ fn main() {
                 .map(|s| String::from(*s))
                 .collect::<Vec<String>>();
 
-            let send = Send::new(String::from(dst), files);
+            if legacy { println!("[#] LEGACY MODE"); }
+            println!("[#] Sending files to Listener");
+
+            let send = Send::new(legacy, String::from(dst), files);
             send.do_send()
         }
-        ("poll", _) => {
+        ("poll", Some(poll_matches)) => {
+            let legacy = poll_matches.is_present("legacy");
+
+            if legacy { println!("[#] LEGACY MODE"); }
             println!("[#] Polling for Broadcaster");
-            let poll = Poll {};
+
+            let poll = Poll::new(legacy);
             poll.do_poll()
         }
         ("push", Some(push_matches)) => {
+            let legacy = push_matches.is_present("legacy");
+
+            if legacy { println!("[#] LEGACY MODE"); }
             println!("[#] Pushing to Poller");
             let files = push_matches
                 .values_of("FILES")
@@ -85,12 +124,12 @@ fn main() {
                 .map(|s| String::from(*s))
                 .collect::<Vec<String>>();
 
-            let push = Push::new(files);
+            let push = Push::new(legacy, files);
             push.do_push()
         }
         ("", _) => {
             println!("[#] Listening for files from Sender");
-            let listen = Listen {};
+            let listen = Listen::new(false);
             listen.do_listen()
         }
         _ => unreachable!(),
