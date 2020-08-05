@@ -1,8 +1,8 @@
-use crate::common;
-use crate::common::networking;
+use crate::common::{RX_RETRIES, compression, networking};
 use std::io::prelude::*;
 use std::net::SocketAddr;
 use std::net::TcpStream;
+use std::{thread, time};
 
 pub struct Poll {}
 
@@ -51,6 +51,7 @@ impl Poll {
 
         let mut data = Vec::new();
         let mut incoming_data;
+        let mut no_rx_cnt = 0;
 
         loop {
             incoming_data = [0; 512];
@@ -59,15 +60,23 @@ impl Poll {
                     let mut convert: Vec<u8> = incoming_data[..n].iter().cloned().collect();
                     data.append(&mut convert);
 
-                    if n < 512 {
-                        break;
+                    if n == 0 {
+                        no_rx_cnt = no_rx_cnt + 1;
+
+                        if no_rx_cnt > RX_RETRIES {
+                            break;
+                        } else {
+                            thread::sleep(time::Duration::from_millis(100));
+                        }
+                    } else {
+                        no_rx_cnt = 0;
                     }
                 }
                 _ => {}
             }
         }
 
-        common::compression::unpack(&data)?;
+        compression::unpack(&data)?;
 
         Ok(())
     }

@@ -4,6 +4,8 @@ pub mod networking;
 use glob::glob;
 use std::fs::metadata;
 
+pub const RX_RETRIES: u8 = 3;
+
 pub type Destination = String;
 
 pub type File = String;
