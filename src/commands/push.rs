@@ -7,19 +7,23 @@ use std::net::TcpListener;
 use std::{thread, time};
 
 pub struct Push {
+    legacy: bool,
     files: Vec<common::File>,
 }
 
 impl Push {
-    pub fn new(files: Vec<common::File>) -> Self {
-        Push { files }
+    pub fn new(legacy: bool, files: Vec<common::File>) -> Self {
+        Push {
+            legacy,
+            files,
+        }
     }
 
     pub fn do_push(&self) -> Result<(), String> {
         let announce = format!("Multicasting for rsncp version {}", common::version());
         let announce = announce.as_bytes();
 
-        let compressed = common::compression::pack(&self.files)?;
+        let compressed = common::compression::pack(self.legacy, &self.files)?;
         let sending_data: &[u8] = &compressed;
 
         println!("[*] starting X-Casting, waiting for TCP connect");

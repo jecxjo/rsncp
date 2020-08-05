@@ -3,13 +3,14 @@ use std::io::prelude::*;
 use std::net::TcpStream;
 
 pub struct Send {
+    legacy: bool,
     destination: common::Destination,
     files: Vec<common::File>,
 }
 
 impl Send {
-    pub fn new(destination: common::Destination, files: Vec<common::File>) -> Self {
-        Send { destination, files }
+    pub fn new(legacy: bool, destination: common::Destination, files: Vec<common::File>) -> Self {
+        Send { legacy, destination, files }
     }
 
     pub fn do_send(&self) -> Result<(), String> {
@@ -21,7 +22,7 @@ impl Send {
             self.destination
         );
 
-        let compressed = common::compression::pack(&self.files)?;
+        let compressed = common::compression::pack(self.legacy, &self.files)?;
         let sending_data: &[u8] = &compressed;
         let mut stream =
             TcpStream::connect(&dst).or(Err(String::from("Could not connect to listener")))?;

@@ -4,9 +4,17 @@ use std::net::SocketAddr;
 use std::net::TcpStream;
 use std::{thread, time};
 
-pub struct Poll {}
+pub struct Poll {
+    legacy: bool,
+}
 
 impl Poll {
+    pub fn new(legacy: bool) -> Self {
+        Poll {
+            legacy,
+        }
+    }
+
     pub fn do_poll(&self) -> Result<(), String> {
         let pusher;
 
@@ -76,7 +84,7 @@ impl Poll {
             }
         }
 
-        compression::unpack(&data)?;
+        compression::unpack(self.legacy, &data)?;
 
         Ok(())
     }
