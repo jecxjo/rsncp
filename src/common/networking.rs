@@ -1,12 +1,20 @@
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use std::io;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, UdpSocket};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV6, UdpSocket};
 
 pub const PORT: u16 = 8002;
 
+pub fn listener_ipv4() -> SocketAddr {
+    SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), PORT)
+}
+
+pub fn listener_ipv6() -> SocketAddrV6 {
+    SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, PORT, 0, 0)
+}
+
 lazy_static! {
     pub static ref IPV4: IpAddr = Ipv4Addr::new(224, 110, 99, 112).into();
-    pub static ref IPV6: IpAddr = Ipv6Addr::new(0xFF02, 0, 0, 0, 0, 0, 0, 0x0123).into();
+    pub static ref IPV6: IpAddr = Ipv6Addr::new(0xFF02, 0, 0, 0, 0, 0, 0x6e63, 0x7030).into();
 }
 
 fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
