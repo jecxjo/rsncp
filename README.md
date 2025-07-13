@@ -1,5 +1,7 @@
 # rsncp / Rust Network Copy
 
+**NOTE** LEAVING GITHUB!!! This project now lives at https://git.sh0.xyz/rsncp.git/
+
 This project is a port of Pyncp which is a port of the original 
 "ncp - a fast file copy tool for LANs" originally written by Felix von
 Leitner <felix-ncp@fefe.de>
